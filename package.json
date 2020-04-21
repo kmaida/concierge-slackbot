@@ -1,0 +1,25 @@
+{
+  "name": "concierge",
+  "version": "0.1.0",
+  "description": "Slack channel-based concierge bot",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@slack/bolt": "^2.0.1",
+    "dotenv": "^8.2.0"
+  },
+  "engines": {
+    "node": "12.x"
+  },
+  "author": "Kim Maida",
+  "repository": {
+    "url": "https://github.com/kmaida/concierge-slackbot"
+  },
+  "license": "MIT",
+  "keywords": [
+    "slackapi",
+    "slackbot"
+  ]
+}
