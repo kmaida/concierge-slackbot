@@ -15,7 +15,23 @@ const port = process.env.PORT || 3000;
      UTILITIES
 ------------------*/
 
-const getAssignmentId = (text) => {
+// Returns true/false if mention text matches the passed simple command (command with no paramters)
+const matchSimpleCommand = (cmd, e, ct) => {
+  const normalizedText = e.text.toLowerCase().trim();
+  const botUserLower = ct.botUserId.toLowerCase();
+  const cmdInput = cmd.toLowerCase().trim();
+  return (normalizedText === `<@${botUserLower}> ${cmdInput}`);
+}
+
+// Returns true if mention text matches properly formatted "assign" command
+const isAssign = (e, ct) => {
+  const normalizedText = e.text.toLowerCase().trim();
+  const botUserLower = ct.botUserId.toLowerCase();
+  return (normalizedText.startsWith(`<@${botUserLower}> assign <@`) && normalizedText.endsWith('>'));
+}
+
+// Takes raw message text and extracts user assignment ID in a message-safe format
+const getAssignmentMsgTxt = (text) => {
   if (text) {
     return text
       .toUpperCase()            // Normalize for inconsistency with "assign" text
@@ -33,7 +49,6 @@ const getAssignmentId = (text) => {
 app.event('app_mention', async({ event, context }) => {
   // Gather applicable info
   const text = event.text;                           // raw text from the message mentioning @concierge
-  const normalizedText = text.toLowerCase().trim();  // normalizes format in commands
   const sentByUser = event.user;                     // user ID
   const channel = event.channel;                     // channel ID
   const channelMsgFormat = `<#${channel}>`;          // channel formatted for message display
@@ -43,9 +58,9 @@ app.event('app_mention', async({ event, context }) => {
     "assign [@user]"
     Assign a user to be the concierge for whatever channel the message was sent in
   ------------------*/
-  if (normalizedText.includes('> assign <@')) {
+  if (isAssign(event, context)) {
     try {
-      const assigned = getAssignmentId(text);
+      const assigned = getAssignmentMsgTxt(text);
       const list = JSON.parse(fs.readFileSync(rotaFile));
       list[channel] = assigned;
       fs.writeFileSync(rotaFile, JSON.stringify(list, null, 2));
@@ -70,7 +85,7 @@ app.event('app_mention', async({ event, context }) => {
     "who"
     Find out who the concierge is right now for the channel the message was sent in
   ------------------*/
-  else if (normalizedText.includes('> who') && normalizedText.endsWith(' who')) {
+  else if (matchSimpleCommand('who', event, context)) {
     try {
       const list = JSON.parse(fs.readFileSync(rotaFile));
       const conciergeNameMsgFormat = list[channel];
@@ -103,7 +118,7 @@ app.event('app_mention', async({ event, context }) => {
     "clear"
     Assign a user to be the Twitter rotation concierge
   ------------------*/
-  if (normalizedText.endsWith('> clear')) {
+  if (matchSimpleCommand('clear', event, context)) {
     try {
       const list = JSON.parse(fs.readFileSync(rotaFile));
 
@@ -135,16 +150,27 @@ app.event('app_mention', async({ event, context }) => {
   }
 
   /*------------------
+    "help"
+  ------------------*/
+  else if (matchSimpleCommand('help', event, context)) {
+    const result = await app.client.chat.postMessage({
+      token: botToken,
+      channel: channel,
+      text: 'Hi there, I\'m the *concierge bot*! Here\'s what I can do:\n• Ask `@concierge who` to check who is currently assigned as concierge in ' + channelMsgFormat + '.\n• Type `@concierge assign [@username]` to assign someone to concierge for this channel.\n• Mention `@concierge` in a message to send a DM to the concierge.\n• Say `@concierge clear` to reset the concierge and unassign the person currently on call.'
+    });
+  }
+
+  /*------------------
     Send a message directly to the concierge
     - Sends a DM to the concierge notifying them where they're needed
     - Notify in channel if there is no concierge assigned
   ------------------*/
   else if (
-    !normalizedText.endsWith('> who') && 
-    !normalizedText.includes('> assign <@') && 
-    !normalizedText.endsWith('> help') && 
-    !normalizedText.endsWith('> clear'))
-  {
+    !matchSimpleCommand('who', event, context) && 
+    !isAssign(event, context) && 
+    !matchSimpleCommand('help', event, context) && 
+    !matchSimpleCommand('clear', event, context)
+  ) {
     try {
       const list = JSON.parse(fs.readFileSync(rotaFile));
       const oncallUser = list[channel];
@@ -177,17 +203,6 @@ app.event('app_mention', async({ event, context }) => {
         text: 'An error occurred contacting the concierge:\n```' + JSON.stringify(err) + '```'
       });
     }
-  }
-
-  /*------------------
-    "help"
-  ------------------*/
-  else if (normalizedText.endsWith('> help')) {
-    const result = await app.client.chat.postMessage({
-      token: botToken,
-      channel: channel,
-      text: 'Hi there, I\'m the *concierge bot*! Here\'s what I can do:\n• Ask `@concierge who` to check who is currently assigned as concierge in ' + channelMsgFormat + '.\n• Type `@concierge assign [@username]` to assign someone to concierge for this channel.\n• Mention `@concierge` in a message to send a DM to the concierge.\n• Say `@concierge clear` to reset the concierge and unassign the person currently on call.'
-    });
   }
   // Log useful things
   console.log('Event: ', event, 'Context: ', context);
