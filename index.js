@@ -292,7 +292,25 @@ app.event('app_mention', async({ event, context }) => {
         const sendPublicMsg = await app.client.chat.postMessage({
           token: botToken,
           channel: channel,
-          text: 'A message has been sent to the concierge. If your message is urgent and you don\'t receive a reply within 15 minutes, please use `@here` or `@channel`.'
+          blocks: [
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": ":speech_balloon: Thanks for pinging me, <@" + sentByUser + ">. *The " + channelMsgFormat + " concierge has been notified about your message!* They'll respond at their earliest convenience.\n_(In the meantime, anyone in the channel can jump in if they want — but no obligations.)_"
+              }
+            },
+            {
+              "type": "divider"
+            },
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": ":rotating_light: If it's *very urgent* and the concierge doesn't respond in 15 minutes (they might be busy or outside working hours), then you can use `@here`.\n:fire: If everything is on fire and *it's a _huge emergency_*, you can use `@channel`."
+              }
+            }
+          ]
         });
       } else {
         const result = await app.client.chat.postMessage({
