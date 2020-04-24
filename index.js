@@ -2,7 +2,7 @@ require('dotenv').config();
 // Require the Bolt package (github.com/slackapi/bolt)
 const { App } = require('@slack/bolt');
 const fs = require('fs');
-const rotaFile = './concierge.json';
+const storeFilepath = './concierge.json';
 
 // Create Bolt app
 const app = new App({
@@ -10,6 +10,23 @@ const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 const port = process.env.PORT || 3000;
+
+/*------------------
+      ON INIT
+------------------*/
+
+// If store file doesn't exist, create it
+if (fs.existsSync(storeFilepath)) {
+  console.log('Local store exists');
+} else {
+  fs.writeFile(storeFilepath, '{}', (error) => {
+    if (error) {
+      console.error('ERROR: Failed to create local store file:', error);
+    } else {
+      console.log('Local store created successfully');
+    }
+  });
+}
 
 /*------------------
      UTILITIES
@@ -34,10 +51,10 @@ const isAssign = (e, ct) => {
 const getAssignmentMsgTxt = (text) => {
   if (text) {
     return text
-      .toUpperCase()            // Normalize for inconsistency with "assign" text
-      .split('ASSIGN ')[1]      // Split into array and get first segment after "assign"
-      .match(/\<(.*?)\>/g)[0]   // Match only the first user ID (in case multiple were provided)
-      .toString();              // Array to string
+      .toUpperCase()                  // Normalize for inconsistency with "assign" text
+      .split('ASSIGN ')[1]            // Split into array and get first segment after "assign"
+      .match(/<@U[A-Z0-9]*?>/g)[0]    // Match only the first user ID (in case multiple were provided)
+      .toString();                    // Array to string
     // Expected output: '<@U01238R77J6>'
   }
 }
@@ -61,9 +78,9 @@ app.event('app_mention', async({ event, context }) => {
   if (isAssign(event, context)) {
     try {
       const assigned = getAssignmentMsgTxt(text);
-      const list = JSON.parse(fs.readFileSync(rotaFile));
+      const list = JSON.parse(fs.readFileSync(storeFilepath));
       list[channel] = assigned;
-      fs.writeFileSync(rotaFile, JSON.stringify(list, null, 2));
+      fs.writeFileSync(storeFilepath, JSON.stringify(list, null, 2));
 
       const result = await app.client.chat.postMessage({
         token: botToken,
@@ -87,7 +104,7 @@ app.event('app_mention', async({ event, context }) => {
   ------------------*/
   else if (matchSimpleCommand('who', event, context)) {
     try {
-      const list = JSON.parse(fs.readFileSync(rotaFile));
+      const list = JSON.parse(fs.readFileSync(storeFilepath));
       const conciergeNameMsgFormat = list[channel];
 
       if (conciergeNameMsgFormat) {
@@ -120,11 +137,11 @@ app.event('app_mention', async({ event, context }) => {
   ------------------*/
   if (matchSimpleCommand('clear', event, context)) {
     try {
-      const list = JSON.parse(fs.readFileSync(rotaFile));
+      const list = JSON.parse(fs.readFileSync(storeFilepath));
 
       if (list[channel]) {
         delete list[channel];
-        fs.writeFileSync(rotaFile, JSON.stringify(list, null, 2));
+        fs.writeFileSync(storeFilepath, JSON.stringify(list, null, 2));
 
         const result = await app.client.chat.postMessage({
           token: botToken,
@@ -172,14 +189,14 @@ app.event('app_mention', async({ event, context }) => {
     !matchSimpleCommand('clear', event, context)
   ) {
     try {
-      const list = JSON.parse(fs.readFileSync(rotaFile));
+      const list = JSON.parse(fs.readFileSync(storeFilepath));
       const oncallUser = list[channel];
 
       if (oncallUser) {
         const link = `https://${process.env.SLACK_TEAM}.slack.com/archives/${channel}/p${event.ts.replace('.', '')}`;
         const sendDM = await app.client.chat.postMessage({
           token: botToken,
-          channel: oncallUser.replace('<@', '').replace('>', ''),
+          channel: oncallUser.replace('<@', '').replace('>', ''), // User ID as channel sends a DM
           text: `Hi there! <@${sentByUser}> needs your attention in ${channelMsgFormat} (${link}).\n\n`
         });
         const sendPublicMsg = await app.client.chat.postMessage({
