@@ -2,9 +2,9 @@ require('dotenv').config();
 // Bolt package (github.com/slackapi/bolt)
 const { App } = require('@slack/bolt');
 // Utility functions
-const utils = require('./utils');
+const utils = require('./utils/utils');
 // Reading / writing to filesystem store
-const store = require('./filesys');
+const store = require('./utils/filesys');
 // Bot responses
 const helpBlocks = require('./bot-response/blocks-help');
 const msgText = require('./bot-response/text-concierge-response');
@@ -144,7 +144,7 @@ app.event('app_mention', async({ event, context }) => {
         const sendChannelMsg = await app.client.chat.postMessage({
           token: botToken,
           channel: channel,
-          blocks: msgText.confirmChannelConciergeMsg(channelMsgFormat, sentByUser)
+          text: msgText.confirmChannelConciergeMsg(channelMsgFormat, sentByUser)
         });
         // Send ephemeral message (only visible to sender) telling them what to do if urgent
         const sendEphemeralMsg = await app.client.chat.postEphemeral({
@@ -158,7 +158,7 @@ app.event('app_mention', async({ event, context }) => {
         const result = await app.client.chat.postMessage({
           token: botToken,
           channel: channel,
-          text: msgText.errorContactingConcierge(channelMsgFormat)
+          text: msgText.noConciergeAssigned(channelMsgFormat)
         });
       }
     }
@@ -167,7 +167,7 @@ app.event('app_mention', async({ event, context }) => {
       const errorResult = await app.client.chat.postMessage({
         token: botToken,
         channel: channel,
-        text: msgText.errorMsg(err)
+        text: msgText.errorContactingConcierge(err)
       });
     }
   }
