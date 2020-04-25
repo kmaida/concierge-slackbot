@@ -3,8 +3,8 @@ require('dotenv').config();
 const { matchSimpleCommand, isAssign, getAssignmentMsgTxt } = require('./utils');
 // Require the Bolt package (github.com/slackapi/bolt)
 const { App } = require('@slack/bolt');
-const fs = require('fs');
-const storeFilepath = './concierge.json';
+// Reading / writing to the store in filesystem
+const store = require('./filesys');
 // Blocks
 const homeBlocks = require('./blocks/blocks-home');
 const helpBlocks = require('./blocks/blocks-help');
@@ -21,18 +21,7 @@ const port = process.env.PORT || 3000;
       ON INIT
 ------------------*/
 
-// If store file doesn't exist, create it
-if (fs.existsSync(storeFilepath)) {
-  console.log('Local store exists');
-} else {
-  fs.writeFile(storeFilepath, '{}', (error) => {
-    if (error) {
-      console.error('ERROR: Failed to create local store file:', error);
-    } else {
-      console.log('Local store created successfully');
-    }
-  });
-}
+store.initStore();
 
 /*------------------
     APP MENTIONS
@@ -53,9 +42,7 @@ app.event('app_mention', async({ event, context }) => {
   if (isAssign(event, context)) {
     try {
       const assigned = getAssignmentMsgTxt(text);
-      const list = JSON.parse(fs.readFileSync(storeFilepath));
-      list[channel] = assigned;
-      fs.writeFileSync(storeFilepath, JSON.stringify(list, null, 2));
+      store.saveAssignment(channel, assigned);
 
       const result = await app.client.chat.postMessage({
         token: botToken,
@@ -79,8 +66,7 @@ app.event('app_mention', async({ event, context }) => {
   ------------------*/
   else if (matchSimpleCommand('who', event, context)) {
     try {
-      const list = JSON.parse(fs.readFileSync(storeFilepath));
-      const conciergeNameMsgFormat = list[channel];
+      const conciergeNameMsgFormat = store.getAssignment(channel);
 
       if (conciergeNameMsgFormat) {
         const result = await app.client.chat.postMessage({
@@ -112,11 +98,10 @@ app.event('app_mention', async({ event, context }) => {
   ------------------*/
   if (matchSimpleCommand('clear', event, context)) {
     try {
-      const list = JSON.parse(fs.readFileSync(storeFilepath));
+      const list = store.getStoreList();
 
       if (list[channel]) {
-        delete list[channel];
-        fs.writeFileSync(storeFilepath, JSON.stringify(list, null, 2));
+        store.clearAssignment(channel);
 
         const result = await app.client.chat.postMessage({
           token: botToken,
@@ -164,8 +149,7 @@ app.event('app_mention', async({ event, context }) => {
     !matchSimpleCommand('clear', event, context)
   ) {
     try {
-      const list = JSON.parse(fs.readFileSync(storeFilepath));
-      const oncallUser = list[channel];
+      const oncallUser = store.getAssignment(channel);
 
       if (oncallUser) {
         const link = `https://${process.env.SLACK_TEAM}.slack.com/archives/${channel}/p${event.ts.replace('.', '')}`;
@@ -227,5 +211,3 @@ app.event('app_home_opened', async ({ event, context, payload }) => {
   await app.start(port);
   console.log(`⚡️ Concierge is running on ${port}!`);
 })();
-
-module.exports = { app, fs, storeFilepath };
