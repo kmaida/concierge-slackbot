@@ -5,10 +5,10 @@ const { App } = require('@slack/bolt');
 const utils = require('./utils');
 // Reading / writing to filesystem store
 const store = require('./filesys');
-// Blocks
-const homeBlocks = require('./blocks/blocks-home');
-const helpBlocks = require('./blocks/blocks-help');
-const publicMsgBlocks = require('./blocks/blocks-message-concierge');
+// Bot responses
+const homeBlocks = require('./bot-response/blocks-home');
+const helpBlocks = require('./bot-response/blocks-help');
+const msgText = require('./bot-response/text-concierge-response');
 
 /*------------------
       ON INIT
@@ -40,10 +40,11 @@ app.event('app_mention', async({ event, context }) => {
     try {
       const assigned = utils.getAssignmentMsgTxt(text);
       store.saveAssignment(channel, assigned);
+      // Post message to channel confirming concierge assignment
       const result = await app.client.chat.postMessage({
         token: botToken,
         channel: channel,
-        text: `${assigned} is now the concierge for ${channelMsgFormat}.`
+        text: msgText.confirmAssignment(assigned, channelMsgFormat)
       });
     }
     catch (err) {
@@ -51,7 +52,7 @@ app.event('app_mention', async({ event, context }) => {
       const errorResult = await app.client.chat.postMessage({
         token: botToken,
         channel: channel,
-        text: 'An error has occurred while trying to assign the concierge for this channel:\n```' + JSON.stringify(err) + '```'
+        text: msgText.errorAssignment(err)
       });
     }
   }
@@ -65,13 +66,13 @@ app.event('app_mention', async({ event, context }) => {
         const result = await app.client.chat.postMessage({
           token: botToken,
           channel: channel,
-          text: '`' + conciergeNameMsgFormat + '` is the concierge for ' + channelMsgFormat + '. To notify them directly, mention `@concierge` in your message.'
+          text: msgText.reportWho(conciergeNameMsgFormat)
         });
       } else {
         const result = await app.client.chat.postMessage({
           token: botToken,
           channel: channel,
-          text: 'Nobody is currently assigned as concierge for ' + channelMsgFormat + '. To assign someone, use `@concierge assign [@user]`.'
+          text: msgText.reportWhoUnassigned(channelMsgFormat)
         });
       }
     }
@@ -80,7 +81,7 @@ app.event('app_mention', async({ event, context }) => {
       const errorResult = await app.client.chat.postMessage({
         token: botToken,
         channel: channel,
-        text: 'An error occurred trying to determine the concierge:\n```' + JSON.stringify(err) + '```'
+        text: msgText.errorWho(err)
       });
     }
   }
@@ -89,20 +90,18 @@ app.event('app_mention', async({ event, context }) => {
   if (utils.matchSimpleCommand('clear', event, context)) {
     try {
       const list = store.getStoreList();
-
       if (list[channel]) {
         store.clearAssignment(channel);
-
         const result = await app.client.chat.postMessage({
           token: botToken,
           channel: channel,
-          text: `Concierge for ${channelMsgFormat} has been unassigned.`
+          text: msgText.confirmClear(channelMsgFormat)
         });
       } else {
         const result = await app.client.chat.postMessage({
           token: botToken,
           channel: channel,
-          text: 'There is currently nobody assigned as concierge for this channel. Nothing changed.'
+          text: msgText.clearNoAssignment()
         });
       }
     }
@@ -111,7 +110,7 @@ app.event('app_mention', async({ event, context }) => {
       const errorResult = await app.client.chat.postMessage({
         token: botToken,
         channel: channel,
-        text: 'An error has occurred while trying to assign the concierge:\n```' + JSON.stringify(err) + '```'
+        text: msgText.errorClear(err)
       });
     }
   }
@@ -135,22 +134,33 @@ app.event('app_mention', async({ event, context }) => {
       const oncallUser = store.getAssignment(channel);
 
       if (oncallUser) {
+        // Someone is assigned to concierge
         const link = `https://${process.env.SLACK_TEAM}.slack.com/archives/${channel}/p${event.ts.replace('.', '')}`;
+        // Send DM to the concierge notifying them of the message that needs their attention
         const sendDM = await app.client.chat.postMessage({
           token: botToken,
           channel: oncallUser.replace('<@', '').replace('>', ''), // User ID as channel sends a DM
-          text: `Hi there! <@${sentByUser}> needs your attention in ${channelMsgFormat} (${link}).\n\n`
+          text: msgText.dmToConcierge(sentByUser, channelMsgFormat, link)
         });
-        const sendPublicMsg = await app.client.chat.postMessage({
+        // Send message to the channel where help was requested notifying that concierge was contacted
+        const sendChannelMsg = await app.client.chat.postMessage({
           token: botToken,
           channel: channel,
-          blocks: publicMsgBlocks(channelMsgFormat, sentByUser)
+          blocks: msgText.confirmChannelConciergeMsg(channelMsgFormat, sentByUser)
+        });
+        // Send ephemeral message only visible to sender telling them what to do if it's urgent
+        const sendEphemeralMsg = await app.client.chat.postEphemeral({
+          token: botToken,
+          channel: channel,
+          user: sentByUser,
+          text: msgText.confirmEphemeralConciergeMsg()
         });
       } else {
+        // No concierge is assigned; give instructions how to assign
         const result = await app.client.chat.postMessage({
           token: botToken,
           channel: channel,
-          text: 'Nobody is currently assigned as concierge for ' + channelMsgFormat + '. To assign someone, use `@concierge assign [@user]`.'
+          text: msgText.errorContactingConcierge(channelMsgFormat)
         });
       }
     }
@@ -159,7 +169,7 @@ app.event('app_mention', async({ event, context }) => {
       const errorResult = await app.client.chat.postMessage({
         token: botToken,
         channel: channel,
-        text: 'An error occurred contacting the concierge:\n```' + JSON.stringify(err) + '```'
+        text: msgText.errorMsg(err)
       });
     }
   }

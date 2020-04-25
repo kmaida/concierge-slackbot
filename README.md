@@ -22,8 +22,19 @@
 6. From your cloned directory, run `$ npm install` to install dependencies.
 7. Run `$ npm start` to start the app on the port you specified in your `.env` file.
 8. Download and use [ngrok](https://ngrok.com) to expose a public URL for your local web server.
-9. Once you have ngrok pointing to your Slack app's local environment, enable Event Subscriptions for your Slack app in the App settings. For the Request URL, provide `https://your-ngrok-url/slack/events`.
-10. 
+9. Once you have ngrok pointing to your Slack app's local development environment, enable Event Subscriptions for your Slack app in the App settings. For the Request URL, provide `https://your-ngrok-url/slack/events`.
+
+## Usage Ideas
+
+Here are some ways you can use the `concierge` bot in conjunction with other Slack features.
+
+### Rotating the Concierge
+
+If your concierge responsibility rotates through several people, you can set a recurring reminder with Slack's `/remind` slash command to remind the concierge to assign the next person. E.g.:
+
+```
+/remind #channel Assign the next person in the @concierge rotation using `@concierge assign [@user]` every Monday
+```
 
 ## Installation
 
