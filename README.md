@@ -19,6 +19,11 @@
 3. Install the app to your team workspace.
 4. Clone this repository locally.
 5. Rename the `.env_sample` file to `.env` and add the appropriate configuration.
+6. From your cloned directory, run `$ npm install` to install dependencies.
+7. Run `$ npm start` to start the app on the port you specified in your `.env` file.
+8. Download and use [ngrok](https://ngrok.com) to expose a public URL for your local web server.
+9. Once you have ngrok pointing to your Slack app's local environment, enable Event Subscriptions for your Slack app in the App settings. For the Request URL, provide `https://your-ngrok-url/slack/events`.
+10. 
 
 ## Installation
 
