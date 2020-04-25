@@ -1,14 +1,18 @@
 require('dotenv').config();
-// Get utilities
-const { matchSimpleCommand, isAssign, getAssignmentMsgTxt } = require('./utils');
-// Require the Bolt package (github.com/slackapi/bolt)
+// Bolt package (github.com/slackapi/bolt)
 const { App } = require('@slack/bolt');
-// Reading / writing to the store in filesystem
+// Utility functions
+const utils = require('./utils');
+// Reading / writing to filesystem store
 const store = require('./filesys');
 // Blocks
 const homeBlocks = require('./blocks/blocks-home');
 const helpBlocks = require('./blocks/blocks-help');
 const publicMsgBlocks = require('./blocks/blocks-message-concierge');
+
+/*------------------
+      ON INIT
+------------------*/
 
 // Create Bolt app
 const app = new App({
@@ -16,11 +20,7 @@ const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 const port = process.env.PORT || 3000;
-
-/*------------------
-      ON INIT
-------------------*/
-
+// Check if store exists; if not, create it
 store.initStore();
 
 /*------------------
@@ -35,15 +35,11 @@ app.event('app_mention', async({ event, context }) => {
   const channelMsgFormat = `<#${channel}>`;          // channel formatted for message display
   const botToken = context.botToken;
 
-  /*------------------
-    "assign [@user]"
-    Assign a user to be the concierge for whatever channel the message was sent in
-  ------------------*/
-  if (isAssign(event, context)) {
+  /*-- "assign [@user]" for this channel --*/
+  if (utils.isAssign(event, context)) {
     try {
-      const assigned = getAssignmentMsgTxt(text);
+      const assigned = utils.getAssignmentMsgTxt(text);
       store.saveAssignment(channel, assigned);
-
       const result = await app.client.chat.postMessage({
         token: botToken,
         channel: channel,
@@ -60,11 +56,8 @@ app.event('app_mention', async({ event, context }) => {
     }
   }
 
-  /*------------------
-    "who"
-    Find out who the concierge is right now for the channel the message was sent in
-  ------------------*/
-  else if (matchSimpleCommand('who', event, context)) {
+  /*-- "who" is the concierge for this channel? --*/
+  else if (utils.matchSimpleCommand('who', event, context)) {
     try {
       const conciergeNameMsgFormat = store.getAssignment(channel);
 
@@ -92,11 +85,8 @@ app.event('app_mention', async({ event, context }) => {
     }
   }
 
-  /*------------------
-    "clear"
-    Assign a user to be the Twitter rotation concierge
-  ------------------*/
-  if (matchSimpleCommand('clear', event, context)) {
+  /*-- "clear" currently assigned concierge for channel --*/
+  if (utils.matchSimpleCommand('clear', event, context)) {
     try {
       const list = store.getStoreList();
 
@@ -125,11 +115,8 @@ app.event('app_mention', async({ event, context }) => {
       });
     }
   }
-
-  /*------------------
-    "help"
-  ------------------*/
-  else if (matchSimpleCommand('help', event, context)) {
+  /*-- "help" -*/
+  else if (utils.matchSimpleCommand('help', event, context)) {
     const result = await app.client.chat.postMessage({
       token: botToken,
       channel: channel,
@@ -137,16 +124,12 @@ app.event('app_mention', async({ event, context }) => {
     });
   }
 
-  /*------------------
-    Send a message directly to the concierge
-    - Sends a DM to the concierge notifying them where they're needed
-    - Notify in channel if there is no concierge assigned
-  ------------------*/
+  /*-- "@concierge [message]" sends DM to concierge and notifies public channel --*/
   else if (
-    !matchSimpleCommand('who', event, context) && 
-    !isAssign(event, context) && 
-    !matchSimpleCommand('help', event, context) && 
-    !matchSimpleCommand('clear', event, context)
+    !utils.matchSimpleCommand('who', event, context) && 
+    !utils.isAssign(event, context) && 
+    !utils.matchSimpleCommand('help', event, context) && 
+    !utils.matchSimpleCommand('clear', event, context)
   ) {
     try {
       const oncallUser = store.getAssignment(channel);
