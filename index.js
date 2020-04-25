@@ -1,4 +1,6 @@
 require('dotenv').config();
+// Get utilities
+const { matchSimpleCommand, isAssign, getAssignmentMsgTxt } = require('./utils');
 // Require the Bolt package (github.com/slackapi/bolt)
 const { App } = require('@slack/bolt');
 const fs = require('fs');
@@ -30,37 +32,6 @@ if (fs.existsSync(storeFilepath)) {
       console.log('Local store created successfully');
     }
   });
-}
-
-/*------------------
-     UTILITIES
-------------------*/
-
-// Returns true/false if mention text matches the passed simple command (command with no paramters)
-const matchSimpleCommand = (cmd, e, ct) => {
-  const normalizedText = e.text.toLowerCase().trim();
-  const botUserLower = ct.botUserId.toLowerCase();
-  const cmdInput = cmd.toLowerCase().trim();
-  return (normalizedText === `<@${botUserLower}> ${cmdInput}`);
-}
-
-// Returns true if mention text matches properly formatted "assign" command
-const isAssign = (e, ct) => {
-  const normalizedText = e.text.toLowerCase().trim();
-  const botUserLower = ct.botUserId.toLowerCase();
-  return (normalizedText.startsWith(`<@${botUserLower}> assign <@`) && normalizedText.endsWith('>'));
-}
-
-// Takes raw message text and extracts user assignment ID in a message-safe format
-const getAssignmentMsgTxt = (text) => {
-  if (text) {
-    return text
-      .toUpperCase()                  // Normalize for inconsistency with "assign" text
-      .split('ASSIGN ')[1]            // Split into array and get first segment after "assign"
-      .match(/<@U[A-Z0-9]*?>/g)[0]    // Match only the first user ID (in case multiple were provided)
-      .toString();                    // Array to string
-    // Expected output: '<@U01238R77J6>'
-  }
 }
 
 /*------------------
@@ -235,17 +206,17 @@ app.event('app_mention', async({ event, context }) => {
 
 app.event('app_home_opened', async ({ event, context, payload }) => {
   // Display App Home
-  const homeView = await appHome.createHome(event.user);
+  // const homeView = await appHome.createHome(event.user);
   
-  try {
-    const result = await app.client.views.publish({
-      token: context.botToken,
-      user_id: event.user,
-      view: homeView
-    });
-  } catch(e) {
-    app.error(e);
-  }
+  // try {
+  //   const result = await app.client.views.publish({
+  //     token: context.botToken,
+  //     user_id: event.user,
+  //     view: homeView
+  //   });
+  // } catch(e) {
+  //   app.error(e);
+  // }
 });
 
 /*------------------
@@ -256,3 +227,5 @@ app.event('app_home_opened', async ({ event, context, payload }) => {
   await app.start(port);
   console.log(`⚡️ Concierge is running on ${port}!`);
 })();
+
+module.exports = { app, fs, storeFilepath };
