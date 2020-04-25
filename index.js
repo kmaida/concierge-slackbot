@@ -25,12 +25,12 @@ store.initStore();
 app.event('app_mention', async({ event, context }) => {
   // Gather applicable info
   const text = event.text;                           // raw text from the message mentioning @concierge
-  const sentByUser = event.user;                     // user ID
+  const sentByUser = event.user;                     // ID of user who sent the message
   const channel = event.channel;                     // channel ID
-  const channelMsgFormat = `<#${channel}>`;          // channel formatted for message display
+  const channelMsgFormat = `<#${channel}>`;          // channel formatted for in-message display
   const botToken = context.botToken;
 
-  /*-- "assign [@user]" for this channel --*/
+  //-- "assign [@user]" for this channel
   if (utils.isAssign(event, context)) {
     try {
       const assigned = utils.getAssignmentMsgTxt(text);
@@ -52,7 +52,7 @@ app.event('app_mention', async({ event, context }) => {
     }
   }
 
-  /*-- "who" is the concierge for this channel? --*/
+  //-- "who" is the concierge for this channel?
   else if (utils.matchSimpleCommand('who', event, context)) {
     try {
       const conciergeNameMsgFormat = store.getAssignment(channel);
@@ -81,7 +81,7 @@ app.event('app_mention', async({ event, context }) => {
     }
   }
 
-  /*-- "clear" currently assigned concierge for channel --*/
+  //-- "clear" currently assigned concierge for channel
   if (utils.matchSimpleCommand('clear', event, context)) {
     try {
       const list = store.getStoreList();
@@ -111,7 +111,8 @@ app.event('app_mention', async({ event, context }) => {
       });
     }
   }
-  /*-- "help" -*/
+
+  //-- "help"
   else if (utils.matchSimpleCommand('help', event, context)) {
     // Send blocks with details on usage of concierge bot
     const result = await app.client.chat.postMessage({
@@ -121,7 +122,7 @@ app.event('app_mention', async({ event, context }) => {
     });
   }
 
-  /*-- "@concierge [message]" sends DM to concierge and notifies public channel --*/
+  //-- "@concierge [message]" sends DM to concierge and notifies public channel
   else if (
     !utils.matchSimpleCommand('who', event, context) && 
     !utils.isAssign(event, context) && 
@@ -170,6 +171,7 @@ app.event('app_mention', async({ event, context }) => {
       });
     }
   }
+
   // Log useful things
   console.log('Event: ', event);
 });

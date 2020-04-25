@@ -1,3 +1,7 @@
+/*------------------
+    BLOCKS: HELP
+------------------*/
+
 const helpBlocks = (channelMsgFormat) => {
   return [
     {

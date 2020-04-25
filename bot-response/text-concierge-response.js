@@ -1,3 +1,7 @@
+/*------------------
+    MESSAGE TEXT
+------------------*/
+
 const msgText = {
   confirmAssignment: (assigned, channelMsgFormat) => {
     return `${assigned} is now the concierge for ${channelMsgFormat}.`;
