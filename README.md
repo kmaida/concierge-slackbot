@@ -33,7 +33,7 @@ Here are some ways you can use the `concierge` bot in conjunction with other Sla
 If your concierge responsibility rotates through several people, you can set a recurring reminder with Slack's `/remind` slash command to remind the concierge to assign the next person. E.g.:
 
 ```
-/remind #channel Assign the next person in the @concierge rotation using `@concierge assign [@user]` every Monday
+/remind [#channel] Assign the next person in the @concierge rotation using `@concierge assign [@user]` every Monday
 ```
 
 ## Installation

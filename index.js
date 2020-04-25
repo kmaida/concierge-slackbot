@@ -6,13 +6,8 @@ const utils = require('./utils');
 // Reading / writing to filesystem store
 const store = require('./filesys');
 // Bot responses
-const homeBlocks = require('./bot-response/blocks-home');
 const helpBlocks = require('./bot-response/blocks-help');
 const msgText = require('./bot-response/text-concierge-response');
-
-/*------------------
-      ON INIT
-------------------*/
 
 // Create Bolt app
 const app = new App({
@@ -20,13 +15,13 @@ const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 const port = process.env.PORT || 3000;
+
 // Check if store exists; if not, create it
 store.initStore();
 
 /*------------------
     APP MENTIONS
 ------------------*/
-
 app.event('app_mention', async({ event, context }) => {
   // Gather applicable info
   const text = event.text;                           // raw text from the message mentioning @concierge
@@ -91,6 +86,7 @@ app.event('app_mention', async({ event, context }) => {
     try {
       const list = store.getStoreList();
       if (list[channel]) {
+        // If there is an existing concierge for this channel, clear it
         store.clearAssignment(channel);
         const result = await app.client.chat.postMessage({
           token: botToken,
@@ -98,6 +94,7 @@ app.event('app_mention', async({ event, context }) => {
           text: msgText.confirmClear(channelMsgFormat)
         });
       } else {
+        // If there's no concierge, send a message saying nothing changed
         const result = await app.client.chat.postMessage({
           token: botToken,
           channel: channel,
@@ -116,6 +113,7 @@ app.event('app_mention', async({ event, context }) => {
   }
   /*-- "help" -*/
   else if (utils.matchSimpleCommand('help', event, context)) {
+    // Send blocks with details on usage of concierge bot
     const result = await app.client.chat.postMessage({
       token: botToken,
       channel: channel,
@@ -132,7 +130,6 @@ app.event('app_mention', async({ event, context }) => {
   ) {
     try {
       const oncallUser = store.getAssignment(channel);
-
       if (oncallUser) {
         // Someone is assigned to concierge
         const link = `https://${process.env.SLACK_TEAM}.slack.com/archives/${channel}/p${event.ts.replace('.', '')}`;
@@ -148,7 +145,7 @@ app.event('app_mention', async({ event, context }) => {
           channel: channel,
           blocks: msgText.confirmChannelConciergeMsg(channelMsgFormat, sentByUser)
         });
-        // Send ephemeral message only visible to sender telling them what to do if it's urgent
+        // Send ephemeral message (only visible to sender) telling them what to do if urgent
         const sendEphemeralMsg = await app.client.chat.postEphemeral({
           token: botToken,
           channel: channel,
@@ -174,13 +171,12 @@ app.event('app_mention', async({ event, context }) => {
     }
   }
   // Log useful things
-  console.log('Event: ', event, 'Context: ', context);
+  console.log('Event: ', event);
 });
 
 /*------------------
      START APP
 ------------------*/
-
 (async () => {
   await app.start(port);
   console.log(`⚡️ Concierge is running on ${port}!`);

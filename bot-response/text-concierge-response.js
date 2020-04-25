@@ -27,7 +27,7 @@ const msgText = {
     return ":speech_balloon: The " + channelMsgFormat + " concierge has been notified about <@" + sentByUser + ">'s message.";
   },
   confirmEphemeralConciergeMsg: () => {
-    return "The concierge will respond at their earliest convenience. They might be busy or outside working hours.\n:rotating_light: If it's *very urgent* and the concierge doesn't respond in 15 minutes, ping this team's `[@usergroup]` or `@here`.\n:fire: If *it's a _huge emergency_*, use `@channel`.";
+    return "The concierge will respond at their earliest convenience. Keep in mind: they might be busy or outside working hours.\n:rotating_light: If it's *very urgent* and nobody replies within 15 minutes, ping the appropriate `[@usergroup]` or use `@here`.\n:fire: If *it's a _huge emergency_*, use `@channel`.";
   },
   noConciergeAssigned: (channelMsgFormat) => {
     return 'Nobody is currently assigned as concierge for ' + channelMsgFormat + '. To assign someone, use `@concierge assign [@user]`.';
