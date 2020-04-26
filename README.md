@@ -1,6 +1,6 @@
 # Concierge
 
-`concierge` is a simple Slackbot I wrote for internal team use at [Gatsby](https://gatsbyjs.com). The inspiration was derived from my time working at [Auth0](https://auth0.com) and using Auth0's extremely useful concierge Slackbot.
+`concierge` is a Slackbot I wrote for internal team use at [Gatsby](https://gatsbyjs.com). The inspiration was derived from my time working at [Auth0](https://auth0.com) and using [Auth0's extremely useful concierge Slackbot](https://auth0.engineering/education-through-automation-slack-concierge-ab97c03ef794). This app was built with the [Bolt JavaScript Slack app framework](https://github.com/slackapi/bolt).
 
 ## Usage
 
