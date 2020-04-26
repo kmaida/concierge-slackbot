@@ -41,17 +41,19 @@ If your concierge responsibility rotates through several people, you can set a r
 /remind [#channel] Assign the next person in the @concierge rotation using `@concierge assign [@user]` every Monday
 ```
 
-**Note:** You can't directly remind the `@concierge` bot user to do something, however, because the bot itself is not the _assigned concierge user_. (E.g., `/remind @concierge do something` will _not_ work as expected because it sends a direct message to the _bot_.) When using `/remind`, you need to send the reminder in the _channel_ where you want the assigned concierge to receive the message.
+**Note:** You can't directly remind "`@concierge`" to do something. I.e., `/remind @concierge do something` will _not_ work because it will send a direct message to the _bot user_, not any specific channel's _assigned human user_. When using `/remind`, you need to send the reminder in the _channel_ where you want the assigned concierge to receive the message.
 
 ### Scheduling Messages
 
-You can also schedule messages to be delivered later. This works with both the built-in `/remind` slash task (similar to above), and also with third party Slack apps like [Gator](https://www.gator.works/), [/schedule](https://slackscheduler.com/), and others. Just schedule the message in the channel whose concierge you'd like to reach. E.g.:
+You can also schedule messages to be delivered later. This works with both the built-in `/remind` slash task (similar to above), and also with third party Slack apps like [Gator](https://www.gator.works/) and [/schedule](https://slackscheduler.com/). Just schedule the message in the channel whose concierge you'd like to reach. E.g.:
 
 ```
 /gator Hey @concierge I need some help with task XYZ please
 ```
 
 ## Deployment
+
+Follow the development instructions again to create a new Slack app, but in your production workspace.
 
 The Slack app should be deployed with the following:
 
@@ -61,8 +63,10 @@ The Slack app should be deployed with the following:
 
 If you're very comfortable with Linux devops, Let's Encrypt, and have a domain name, I recommend [DigitalOcean](https://www.digitalocean.com/pricing/). If you want fast, easy deployments with CI/CD features and don't want to deal with devops, domains, or configuring SSL, I recommend a hobby dyno on [Heroku](https://www.heroku.com/pricing).
 
-Whatever deployment option you choose, once you have a public domain for your Slack app with SSL, go into your Slack app settings and update the **Event Subscription** Request URL to `https://your-public-url/slack/events`.
+If using DigitalOcean, input your production environment variables in a `.env` file on your server.
 
---
+If using Heroku, input your production environment variables in your Heroku app settings.
 
-[MIT License 2020](LICENSE)
+Whatever deployment option you choose, once you have a public domain for your Slack app with SSL, go into your production Slack app settings and update the **Event Subscription** Request URL to `https://your-public-url/slack/events`.
+
+[MIT License](LICENSE)
