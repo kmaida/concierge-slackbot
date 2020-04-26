@@ -1,6 +1,6 @@
 # Concierge
 
-`concierge` is a Slackbot I wrote for internal team use at [Gatsby](https://gatsbyjs.com). The inspiration was derived from my time working at [Auth0](https://auth0.com) and using [Auth0's extremely useful concierge Slackbot](https://auth0.engineering/education-through-automation-slack-concierge-ab97c03ef794). This app was built with the [Bolt JavaScript Slack app framework](https://github.com/slackapi/bolt).
+`concierge` is a Slackbot I wrote for internal team use at [Gatsby](https://gatsbyjs.com). The inspiration was derived from my time working at [Auth0](https://auth0.com) and using [Auth0's extremely useful concierge Slackbot](https://auth0.engineering/education-through-automation-slack-concierge-ab97c03ef794). This app was built from scratch with the [Bolt JavaScript Slack app framework](https://github.com/slackapi/bolt), reproducing and enhancing features of the original concierge bot.
 
 ## Usage
 
@@ -9,6 +9,26 @@
 * `@concierge who` reports the name of the assigned concierge in the current channel
 * `@concierge help` shows the list of available commands
 * `@concierge [some other message]` sends a direct message to the concierge for the channel, notifying them that your message needs attention
+
+Here are some ways you can use the `@concierge` bot in conjunction with other Slack features / third party apps.
+
+### Rotating the Concierge
+
+If your concierge responsibility rotates through several people, you can set a recurring reminder with Slack's `/remind` slash command to remind the channel concierge to assign the next person in the rotation. E.g.:
+
+```
+/remind [#channel] Assign the next person in the @concierge rotation using `@concierge assign [@user]` every Monday
+```
+
+**Note:** You can't directly remind "`@concierge`" to do something. I.e., `/remind @concierge do something` will _not_ work because it will send a direct message to the _bot user_, not any specific channel's _assigned human user_. When using `/remind`, you need to send the reminder in the _channel_ where you want the assigned concierge to receive the message.
+
+### Scheduling Messages
+
+You can also schedule messages to be delivered later. This works with both the built-in `/remind` slash task (similar to above), and also with third party Slack apps like [Gator](https://www.gator.works/) and [/schedule](https://slackscheduler.com/). Just schedule the message in the channel whose concierge you'd like to reach. E.g.:
+
+```
+/gator Hey @concierge I need some help with task XYZ please
+```
 
 ## Development
 
@@ -29,28 +49,6 @@
 13. Subscribe to `app_mentions` in the Event Subscriptions Bot Events.
 
 **Note:** If you change scopes during development, you may need to _reinstall_ the app to your workspace.
-
-## Usage Ideas
-
-Here are some ways you can use the `concierge` bot in conjunction with other Slack features / third party apps.
-
-### Rotating the Concierge
-
-If your concierge responsibility rotates through several people, you can set a recurring reminder with Slack's `/remind` slash command to remind the concierge to assign the next person. E.g.:
-
-```
-/remind [#channel] Assign the next person in the @concierge rotation using `@concierge assign [@user]` every Monday
-```
-
-**Note:** You can't directly remind "`@concierge`" to do something. I.e., `/remind @concierge do something` will _not_ work because it will send a direct message to the _bot user_, not any specific channel's _assigned human user_. When using `/remind`, you need to send the reminder in the _channel_ where you want the assigned concierge to receive the message.
-
-### Scheduling Messages
-
-You can also schedule messages to be delivered later. This works with both the built-in `/remind` slash task (similar to above), and also with third party Slack apps like [Gator](https://www.gator.works/) and [/schedule](https://slackscheduler.com/). Just schedule the message in the channel whose concierge you'd like to reach. E.g.:
-
-```
-/gator Hey @concierge I need some help with task XYZ please
-```
 
 ## Deployment
 
