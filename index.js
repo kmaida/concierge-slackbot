@@ -61,7 +61,7 @@ app.event('app_mention', async({ event, context }) => {
         const result = await app.client.chat.postMessage({
           token: botToken,
           channel: channel,
-          text: msgText.reportWho(conciergeNameMsgFormat)
+          text: msgText.reportWho(conciergeNameMsgFormat, channelMsgFormat)
         });
       } else {
         const result = await app.client.chat.postMessage({
@@ -122,7 +122,7 @@ app.event('app_mention', async({ event, context }) => {
     });
   }
 
-  //-- "@concierge [message]" sends DM to concierge and notifies public channel
+  //-- "@concierge [message]" sends DM to concierge, notifies channel, and notifies sender via ephemeral
   else if (
     !utils.matchSimpleCommand('who', event, context) && 
     !utils.isAssign(event, context) && 
@@ -132,7 +132,7 @@ app.event('app_mention', async({ event, context }) => {
     try {
       const oncallUser = store.getAssignment(channel);
       if (oncallUser) {
-        // Someone is assigned to concierge
+        // If someone is assigned to concierge...
         const link = `https://${process.env.SLACK_TEAM}.slack.com/archives/${channel}/p${event.ts.replace('.', '')}`;
         // Send DM to the concierge notifying them of the message that needs their attention
         const sendDM = await app.client.chat.postMessage({
