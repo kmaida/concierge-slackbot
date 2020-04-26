@@ -53,20 +53,22 @@ You can also schedule messages to be delivered later. This works with both the b
 
 ## Deployment
 
-Follow the development instructions again to create a new Slack app, but in your production workspace.
+Follow the [development instructions again](#development) to create a new Slack app, but in your production workspace.
 
 The Slack app should be deployed with the following:
 
-* Node server stays running (e.g., a free plan on Heroku will not work because the app will sleep and cause long delays when it wakes)
+* Node server stays running
 * SSL
 * Public URL (you do _not_ need an elegant URL, since the URL is never displayed, it's only for Slack app configuration)
 
-If you're very comfortable with Linux devops, Let's Encrypt, and have a domain name, I recommend [DigitalOcean](https://www.digitalocean.com/pricing/). If you want fast, easy deployments with CI/CD features and don't want to deal with devops, domains, or configuring SSL, I recommend a hobby dyno on [Heroku](https://www.heroku.com/pricing).
+If you're very comfortable with Linux devops, Let's Encrypt, and have a domain name, I recommend [DigitalOcean](https://www.digitalocean.com/pricing/). If you want fast, easy deployments with CI/CD features and don't want to deal with devops, domains, or configuring SSL, I recommend a hobby dyno on [Heroku](https://www.heroku.com/pricing) (a free plan on Heroku will not work well because the app will sleep after 30 minutes, and cause long delays responding when it wakes).
 
 If using DigitalOcean, input your production environment variables in a `.env` file on your server.
 
 If using Heroku, input your production environment variables in your Heroku app settings.
 
-Whatever deployment option you choose, once you have a public domain for your Slack app with SSL, go into your production Slack app settings and update the **Event Subscription** Request URL to `https://your-public-url/slack/events`.
+Whatever deployment option you choose, once you have a public domain for your Slack app with SSL, go into your production Slack app settings and update the **Event Subscriptions** Request URL to `https://your-public-url/slack/events`.
+
+---
 
 [MIT License](LICENSE)
