@@ -16,17 +16,22 @@
 
 1. [Create a new Slack app](https://api.slack.com/apps/new).
 2. Name your app `Slack App Name` and select your preferred development Slack workspace.
-3. Install the app to your team workspace.
-4. Clone this repository locally.
-5. Rename the `.env_sample` file to `.env` and add the appropriate configuration.
-6. From your cloned directory, run `$ npm install` to install dependencies.
-7. Run `$ npm start` to start the app on the port you specified in your `.env` file.
-8. Download and use [ngrok](https://ngrok.com) to expose a public URL for your local web server.
-9. Once you have ngrok pointing to your Slack app's local development environment, enable Event Subscriptions for your Slack app in the App settings. For the Request URL, provide `https://your-ngrok-url/slack/events`.
+3. Under **Incoming Webhooks**, click the toggle to turn webhooks `On`.
+4. In the **OAuth & Permissions** section, add Bot Token Scopes for `app_mentions:read`, `chat:write`, and `incoming-webhook`.
+5. Under **Install App**, click the button to install the app to your team workspace. When prompted, choose a channel to install to (it can be any channel.) This will generate a bot user OAuth access token (which you will need to configure your local environment variables).
+6. Clone this repository locally.
+7. Rename the `.env_sample` file to `.env` and add the appropriate configuration from your Slack app settings.
+8. From your cloned directory, run `$ npm install` to install dependencies.
+9. Run `$ npm start` to start the app on the port you specified in your `.env` file.
+10. Download and use [ngrok](https://ngrok.com) to expose a public URL for your local web server.
+11. Once you have ngrok pointing to your Slack app's local development environment and the server is running, enable **Event Subscriptions** for your Slack app in the App settings. For the Request URL, provide `https://your-ngrok-url/slack/events`.
+12. Subscribe to `app_mentions` in the Event Subscriptions Bot Events.
+
+**Note:** If you change scopes during development, you may need to _reinstall_ the app to your workspace.
 
 ## Usage Ideas
 
-Here are some ways you can use the `concierge` bot in conjunction with other Slack features.
+Here are some ways you can use the `concierge` bot in conjunction with other Slack features / third party apps.
 
 ### Rotating the Concierge
 
@@ -36,6 +41,28 @@ If your concierge responsibility rotates through several people, you can set a r
 /remind [#channel] Assign the next person in the @concierge rotation using `@concierge assign [@user]` every Monday
 ```
 
-## Installation
+**Note:** You can't directly remind the `@concierge` bot user to do something, however, because the bot itself is not the _assigned concierge user_. (E.g., `/remind @concierge do something` will _not_ work as expected because it sends a direct message to the _bot_.) When using `/remind`, you need to send the reminder in the _channel_ where you want the assigned concierge to receive the message.
 
-_(Coming soon)_
+### Scheduling Messages
+
+You can also schedule messages to be delivered later. This works with both the built-in `/remind` slash task (similar to above), and also with third party Slack apps like [Gator](https://www.gator.works/), [/schedule](https://slackscheduler.com/), and others. Just schedule the message in the channel whose concierge you'd like to reach. E.g.:
+
+```
+/gator Hey @concierge I need some help with task XYZ please
+```
+
+## Deployment
+
+The Slack app should be deployed with the following:
+
+* Node server stays running (e.g., a free plan on Heroku will not work because the app will sleep and cause long delays when it wakes)
+* SSL
+* Public URL (you do _not_ need an elegant URL, since the URL is never displayed, it's only for Slack app configuration)
+
+If you're very comfortable with Linux devops, Let's Encrypt, and have a domain name, I recommend [DigitalOcean](https://www.digitalocean.com/pricing/). If you want fast, easy deployments with CI/CD features and don't want to deal with devops, domains, or configuring SSL, I recommend a hobby dyno on [Heroku](https://www.heroku.com/pricing).
+
+Whatever deployment option you choose, once you have a public domain for your Slack app with SSL, go into your Slack app settings and update the **Event Subscription** Request URL to `https://your-public-url/slack/events`.
+
+--
+
+[MIT License 2020](LICENSE)
