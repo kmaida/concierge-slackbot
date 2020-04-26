@@ -15,17 +15,18 @@
 **Prerequisite**: A Slack workspace that you can test in (without disturbing or spamming your coworkers 😛). You can [create a new Slack workspace for free here](https://slack.com/get-started#/create).
 
 1. [Create a new Slack app](https://api.slack.com/apps/new).
-2. Name your app `Slack App Name` and select your preferred development Slack workspace.
-3. Under **Incoming Webhooks**, click the toggle to turn webhooks `On`.
-4. In the **OAuth & Permissions** section, add Bot Token Scopes for `app_mentions:read`, `chat:write`, and `incoming-webhook`.
-5. Under **Install App**, click the button to install the app to your team workspace. When prompted, choose a channel to install to (it can be any channel.) This will generate a bot user OAuth access token (which you will need to configure your local environment variables).
-6. Clone this repository locally.
-7. Rename the `.env_sample` file to `.env` and add the appropriate configuration from your Slack app settings.
-8. From your cloned directory, run `$ npm install` to install dependencies.
-9. Run `$ npm start` to start the app on the port you specified in your `.env` file.
-10. Download and use [ngrok](https://ngrok.com) to expose a public URL for your local web server.
-11. Once you have ngrok pointing to your Slack app's local development environment and the server is running, enable **Event Subscriptions** for your Slack app in the App settings. For the Request URL, provide `https://your-ngrok-url/slack/events`.
-12. Subscribe to `app_mentions` in the Event Subscriptions Bot Events.
+2. Name your app `concierge` and select your preferred development Slack workspace.
+3. Under **App Home**, make sure your bot and app's name are `concierge`.
+4. Under **Incoming Webhooks**, click the toggle to turn webhooks `On`.
+5. In the **OAuth & Permissions** section, add Bot Token Scopes for `app_mentions:read`, `chat:write`, and `incoming-webhook`.
+6. Under **Install App**, click the button to install the app to your team workspace. When prompted, choose a channel to install to (it can be any channel.) This will generate a bot user OAuth access token (which you will need to configure your local environment variables).
+7. Clone this repository locally.
+8. Rename the `.env_sample` file to `.env` and add the appropriate configuration from your Slack app settings.
+9. From your cloned directory, run `$ npm install` to install dependencies.
+10. Run `$ npm start` to start the app on the port you specified in your `.env` file.
+11. Download and use [ngrok](https://ngrok.com) to expose a public URL for your local web server.
+12. Once you have ngrok pointing to your Slack app's local development environment and the server is running, enable **Event Subscriptions** for your Slack app in the App settings. For the Request URL, provide `https://your-ngrok-url/slack/events`.
+13. Subscribe to `app_mentions` in the Event Subscriptions Bot Events.
 
 **Note:** If you change scopes during development, you may need to _reinstall_ the app to your workspace.
 
@@ -53,7 +54,7 @@ You can also schedule messages to be delivered later. This works with both the b
 
 ## Deployment
 
-Follow the [development instructions again](#development) to create a new Slack app, but in your production workspace.
+Follow the [development instructions again](#development) to create a new Slack app, but **in your production workspace**.
 
 The Slack app should be deployed with the following:
 
