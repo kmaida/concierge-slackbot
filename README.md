@@ -97,4 +97,6 @@ If using Heroku, input your production environment variables in your Heroku app 
 
 Whatever deployment option you choose, once you have a public domain for your Slack app with SSL, go into your production Slack app settings and update the **Event Subscriptions** Request URL to `https://your-public-url/slack/events`.
 
+---
+
 [MIT License](LICENSE)
