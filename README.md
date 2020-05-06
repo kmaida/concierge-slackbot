@@ -10,45 +10,70 @@
 * `@concierge help` shows the list of available commands
 * `@concierge [some other message]` sends a direct message to the concierge for the channel, notifying them that your message needs attention
 
-Here are some ways you can use the `@concierge` bot in conjunction with other Slack features / third party apps.
+## Tips
 
-### Rotating the Concierge
+Concierge does **not** handle _message scheduling_ or _automate_ assignments. But don't worry — since `@concierge` is a bot and not slash commands, it plays (fairly) well with others! Here are some ways you can use the `@concierge` bot in conjunction with other Slack features / third party apps.
 
-If your concierge responsibility rotates through several people, you can set a recurring reminder with Slack's `/remind` slash command to remind the channel concierge to assign the next person in the rotation. E.g.:
+### Rotation Reminders
 
+You can set a recurring reminder with Slack's `/remind` slash command to remind a channel's concierge to assign someone else at some regular interval. For example:
+
+_(In a #channel)_
 ```
-/remind [#channel] Assign the next person in the @concierge rotation using `@concierge assign [@user]` every Monday
+/remind [#channel] @concierge assign the next user to concierge using `@concierge assign [@someone]` every Monday at 9am
 ```
 
-**Note:** You can't directly remind "`@concierge`" to do something. I.e., `/remind @concierge do something` will _not_ work because it will send a direct message to the _bot user_, not any specific channel's _assigned human user_. When using `/remind`, you need to send the reminder in the _channel_ where you want the assigned concierge to receive the message.
+**Note:** You _can't_ directly remind the `@concierge` bot to do something. For instance, `/remind @concierge [message] in 5 minutes` will _not_ work because it will try to send a direct message to the _bot user_, not the channel's _assigned human concierge_. When using `/remind`, you need to set the reminder _in a channel_. Reminders come from Slackbot, and Concierge and Slackbot can't talk to each other.
 
 ### Scheduling Messages
 
-You can also schedule messages to be delivered later. This works with both the built-in `/remind` slash task (similar to above), and also with third party Slack apps like [Gator](https://www.gator.works/) and [/schedule](https://slackscheduler.com/). Just schedule the message in the channel whose concierge you'd like to reach. E.g.:
+You can schedule messages to be delivered later. This is particularly useful in case the concierge is outside of hours. This works with both the built-in `/remind` slash task (similar to above), and also with third party Slack apps like [Gator](https://www.gator.works/). Schedule the message _in a channel_ that the `@concierge` bot has been added to. Like so:
 
+_(In a #channel)_
 ```
-/gator Hey @concierge I need some help with task XYZ please
+/gator Hey @concierge, I need some help with task XYZ please
 ```
+
+**Note:** Keep in mind that if you use `/remind`, the message will come from `@Slackbot`, _not from your username_. If you need the concierge to know the message was from _you_, either include your username in the reminder when you set it up, or use a third-party app that delivers the message later from your account (e.g., Gator does this).
+
+**Caveat:** Because the company I work at uses [Gator](https://www.gator.works/), Concierge has been tested with `/remind` (which is part of Slack's core) and `/gator`. If you use a different third-party scheduling Slack app, keep in mind that its interactions with Rota are _untested_ and I make _no guarantees_ the integrations will work well together. (If you want to submit issues requesting additional third party integration support, you may, but their maintenance will likely be up to the community. Please feel free to fork this repo, add support, and then [submit a PR](https://github.com/kmaida/concierge-slackbot/pull/new/master).)
 
 ## Development
 
 **Prerequisite**: A Slack workspace that you can test in (without disturbing or spamming your coworkers 😛). You can [create a new Slack workspace for free here](https://slack.com/get-started#/create).
 
+### Slack App Initial Setup
+
 1. [Create a new Slack app](https://api.slack.com/apps/new).
 2. Name your app `concierge` and select your preferred development Slack workspace.
 3. Under **App Home**, make sure your bot and app's name are `concierge`.
-4. Under **Incoming Webhooks**, click the toggle to turn webhooks `On`.
-5. In the **OAuth & Permissions** section, add Bot Token Scopes for `app_mentions:read`, `chat:write`, and `incoming-webhook`.
-6. Under **Install App**, click the button to install the app to your team workspace. When prompted, choose a channel to install to (it can be any channel.) This will generate a bot user OAuth access token (which you will need to configure your local environment variables).
-7. Clone this repository locally.
-8. Rename the `.env_sample` file to `.env` and add the appropriate configuration from your Slack app settings.
-9. From your cloned directory, run `$ npm install` to install dependencies.
-10. Run `$ npm start` to start the app on the port you specified in your `.env` file.
-11. Download and use [ngrok](https://ngrok.com) to expose a public URL for your local web server.
-12. Once you have ngrok pointing to your Slack app's local development environment and the server is running, enable **Event Subscriptions** for your Slack app in the App settings. For the Request URL, provide `https://your-ngrok-url/slack/events`.
-13. Subscribe to `app_mentions` in the Event Subscriptions Bot Events.
+  * Toggle on "Always Show My Bot as Online".
+  * Enable the Messages Tab.
+4. Under **Incoming Webhooks**, click the toggle to switch "Activate Incoming Webhooks" `On`.
+5. In the **OAuth & Permissions** section, add "Bot Token Scopes" for `app_mentions:read`, `chat:write`, and `incoming-webhook`.
+6. Under **Install App**, click the "Install App" button to install to your team workspace. When prompted, choose a channel to install to (it can be any channel.) This will generate a "Bot User OAuth Access Token" (which you will need in order to configure your local environment variables). The token will be displayed after you've installed your app. _Note that if you update any Scopes later, you'll have to reinstall your app._
 
-**Note:** If you change scopes during development, you may need to _reinstall_ the app to your workspace.
+### Database Setup
+
+1. You can use [mongoDB Atlas](https://cloud.mongodb.com/) to persist the concierge data store. [Sign up for an account](https://www.mongodb.com/cloud/atlas/register) and create a FREE cluster.
+2. Select your preferred **Cloud Provider & Region**. You may also give your cluster a name if you like.
+3. Your cluster will take a few minutes to deploy.
+4. Once it's complete, click the **CONNECT** button. This will open a modal where you can set up a connection to your database.
+5. Click **Add a Different IP Address** and enter `0.0.0.0/0`. This allows connections from any IP (keep in mind you should ensure good authentication with this.)
+6. **Create a MongoDB User**. This is a _database user_, and these credentials will be used in your `MONGO_URI`. Enter a Username and use the button to Autogenerate Secure Password. Make note of the username and password, then click "Create MongoDB User" and then proceed to the next step.
+7. In **Choose a Connection Method**, select "Connect your application." Use `Node.js` as the driver with the latest version available. Then copy the "Connection String Only."
+8. In a text file or other secure place (such as a password manager), paste the copied connection string and _modify_ it to replace `<username>` and `<password>` with the credentials you just created in the previous step. Replace the database name (`test`) with a name of your choosing (e.g., `rota`).
+
+### Code and Configuration Setup
+
+1. Clone this repository locally to your desktop.
+2. Rename the `.env_sample` file to `.env` and update the placeholder info with the appropriate configuration from your [Slack app settings](#slack-app-initial-setup) and [MongoDB Atlas connection](#database-setup).
+3. From your cloned directory, run `$ npm install` to install dependencies.
+4. Run `$ npm start` to start the app on the port specified in your `.env` file.
+5. Download and use [ngrok](https://ngrok.com) to expose a public URL for your local web server.
+6. Once you have ngrok pointing to your Slack app's local development environment and the server is running, go to your **Slack App settings** and in the **Event Subscriptions** section, toggle `On` "Enable Events."
+7. For the "Request URL," enter `https://your-ngrok-url/slack/events`.
+8. In "Subscribe to bot events," add `app_mentions`.
 
 ## Deployment
 
@@ -58,16 +83,18 @@ The Slack app should be deployed with the following:
 
 * Node server stays running
 * SSL
-* Public URL (you do _not_ need an elegant URL, since the URL is never displayed, it's only for Slack app configuration)
+* Public URL (you do _not_ need a pretty URL, since the URL is never displayed; it's only for Slack app configuration)
 
-If you're very comfortable with Linux devops, Let's Encrypt, and have a domain name, I recommend [DigitalOcean](https://www.digitalocean.com/pricing/). If you want fast, easy deployments with CI/CD features and don't want to deal with devops, domains, or configuring SSL, I recommend a hobby dyno on [Heroku](https://www.heroku.com/pricing) (a free plan on Heroku will not work well because the app will sleep after 30 minutes, and cause long delays responding when it wakes).
+If you're very comfortable with Linux devops, Let's Encrypt, and have a domain name, I recommend [DigitalOcean](https://www.digitalocean.com/pricing/) as a VPS if you've got other applications to deploy as well. This will keep costs down, as some providers (such as Heroku) charge per app.
 
-If using DigitalOcean, input your production environment variables in a `.env` file on your server.
+If you want fast, easy deployments with CI/CD features and don't want to deal with devops, domains, or configuring SSL, I recommend a [hobby dyno on Heroku](https://www.heroku.com/pricing).
+
+**Note:** A _free_ dyno on Heroku _will not work well_ because the app will sleep after 30 minutes, which causes long response times when it needs to wake back up.
+
+If using DigitalOcean (or a similar VPS), input your production environment variables in a `.env` file on your server.
 
 If using Heroku, input your production environment variables in your Heroku app settings.
 
 Whatever deployment option you choose, once you have a public domain for your Slack app with SSL, go into your production Slack app settings and update the **Event Subscriptions** Request URL to `https://your-public-url/slack/events`.
-
----
 
 [MIT License](LICENSE)
