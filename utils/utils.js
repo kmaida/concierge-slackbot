@@ -3,30 +3,35 @@
 ------------------*/
 
 const utils = {
+  removeUsernames(input) {
+    return input.replace(/\|[a-z0-9._\-]+?>/g, '>');
+  },
   // Returns true/false if mention text matches the passed simple command (command with no paramters)
-  matchSimpleCommand: (cmd, e, ct) => {
-    const normalizedText = e.text.toLowerCase().trim();
-    const botUserLower = ct.botUserId.toLowerCase();
-    const cmdInput = cmd.toLowerCase().trim();
-    return normalizedText.startsWith(`<@${botUserLower}`) && normalizedText.endsWith(`> ${cmdInput}`);
+  matchSimpleCommand(cmd, e, ct) {
+    const stripUsernames = this.removeUsernames(e.text);
+    const normalizedText = stripUsernames.toUpperCase().trim();
+    const cmdInput = cmd.toUpperCase();
+    return (normalizedText === `<@${ct.botUserId}> ${cmdInput}`);
   },
   // Takes raw message text and extracts user assignment ID in a message-safe format
-  getAssignmentMsgTxt: (text) => {
+  getAssignmentMsgTxt(text) {
     if (text) {
-      const usermention = text
+      const stripUsernames = this.removeUsernames(text);  // Remove any |user.name from the string
+      const usermention = stripUsernames
         .toUpperCase()                          // Normalize for inconsistency with "assign" text
         .split('ASSIGN ')[1]                    // Split into array and get first segment after "assign"
-        .match(/<@U[A-Z0-9|a-z._]+?>/g)[0]      // Match only the first user ID (in case multiple were provided)
+        .match(/<@U[A-Z0-9]+?>/g)[0]            // Match only the first user ID (in case multiple were provided)
         .toString();                            // Array to string
-        // Expected output: '<@U01238R77J6>' or '<@U01238R77J6|user.name>'
-      return usermention.includes('|') ? `${usermention.split('|')[0]}>` : usermention;
+        // Expected output: '<@U01238R77J6>'
+      return usermention;
     }
   },
   // Returns true if mention text matches properly formatted "assign" command
-  isAssign: (e, ct) => {
-    const normalizedText = e.text.toUpperCase().trim();
-    const assignRegex = /^<@U[A-Z0-9|._]+?> ASSIGN <@U[A-Z0-9|._]+?>/g;
-    return (normalizedText.startsWith(`<@${ct.botUserId}`) && assignRegex.test(normalizedText));
+  isAssign(e, ct) {
+    const stripUsernames = this.removeUsernames(e.text);
+    const normalizedText = stripUsernames.toUpperCase().trim();
+    const assignRegex = /^<@U[A-Z0-9]+?> ASSIGN <@U[A-Z0-9]+?>/g;
+    return (normalizedText.startsWith(`<@${ct.botUserId}>`) && assignRegex.test(normalizedText));
   },
   // Returns boolean indicating whether the channel is in the list
   inList(channel, list) {

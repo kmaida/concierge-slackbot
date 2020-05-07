@@ -7,7 +7,7 @@ const msgText = {
     return `${assigned} is now the concierge for ${channelMsgFormat}.`;
   },
   errorAssignment: (err) => {
-    return 'An error has occurred while trying to assign the concierge for this channel:\n```' + JSON.stringify(err) + '```';
+    return 'An error has occurred while trying to assign the concierge for this channel:\n```' + err + '```';
   },
   reportWho: (conciergeNameMsgFormat, channelMsgFormat) => {
     return '`' + conciergeNameMsgFormat + '` is the concierge for ' + channelMsgFormat + '. To notify them directly, mention `@concierge` in your message.';
@@ -16,7 +16,7 @@ const msgText = {
     return 'Nobody is currently assigned as concierge for ' + channelMsgFormat + '. To assign someone, use `@concierge assign [@user]`.';
   },
   errorWho: (err) => {
-    return 'An error occurred trying to determine the concierge:\n```' + JSON.stringify(err) + '```';
+    return 'An error occurred trying to determine the concierge:\n```' + err + '```';
   },
   confirmClear: (channelMsgFormat) => {
     return `Concierge for ${channelMsgFormat} has been unassigned.`;
@@ -25,7 +25,7 @@ const msgText = {
     return 'There is currently nobody assigned as concierge for this channel. Nothing changed.';
   },
   errorClear: (err) => {
-    return 'An error has occurred while trying to clear the concierge assignment:\n```' + JSON.stringify(err) + '```';
+    return 'An error has occurred while trying to clear the concierge assignment:\n```' + err + '```';
   },
   confirmChannelConciergeMsg: (channelMsgFormat, sentByUser) => {
     return ":speech_balloon: The " + channelMsgFormat + " concierge has been notified about <@" + sentByUser + ">'s message.";
@@ -40,7 +40,7 @@ const msgText = {
     return `Hi there! <@${sentByUser}> needs your attention in ${channelMsgFormat} (${link}).\n\n`;
   },
   errorContactingConcierge: (err) => {
-    return 'An error occurred contacting the concierge:\n```' + JSON.stringify(err) + '```';
+    return 'An error occurred contacting the concierge:\n```' + err + '```';
   }
 }
 
