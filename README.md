@@ -23,7 +23,7 @@ _(In a #channel)_
 /remind [#channel] @concierge assign the next user to concierge using `@concierge assign [@someone]` every Monday at 9am
 ```
 
-**Note:** You _can't_ directly remind the `@concierge` bot to do something. For instance, `/remind @concierge [message] in 5 minutes` will _not_ work because it will try to send a direct message to the _bot user_, not the channel's _assigned human concierge_. When using `/remind`, you need to set the reminder _in a channel_. Reminders come from Slackbot, and Concierge and Slackbot can't talk to each other.
+**Note:** You _can't_ directly remind the `@concierge` _bot_ to do something. For instance, `/remind @concierge [message] in 5 minutes` will _not_ work because it will try to send a direct message to the _bot user_, not the channel's _assigned human concierge_. When using `/remind`, you need to set the reminder _in a channel_. Reminders come from Slackbot, and Concierge and Slackbot aren't allowed to talk directly to each other.
 
 ### Scheduling Messages
 

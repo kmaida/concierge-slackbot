@@ -1,4 +1,4 @@
-module.exports = async (app, store, msgText, botToken, channel, channelMsgFormat) => {
+module.exports = async (app, store, msgText, botToken, channel, channelMsgFormat, errHandler) => {
   try {
     const conciergeObj = await store.getConcierge(channel);
 
@@ -18,11 +18,6 @@ module.exports = async (app, store, msgText, botToken, channel, channelMsgFormat
     }
   }
   catch (err) {
-    console.error(err);
-    const errorResult = await app.client.chat.postMessage({
-      token: botToken,
-      channel: channel,
-      text: msgText.errorWho(err)
-    });
+    errHandler(app, botToken, channel, msgText, err);
   }
 };

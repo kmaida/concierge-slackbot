@@ -3,6 +3,7 @@ require('dotenv').config();
 const { App } = require('@slack/bolt');
 // Utility functions
 const utils = require('./utils/utils');
+const errHandler = require('./utils/error');
 // MongoDB
 const mongoose = require('mongoose');
 const store = require('./data/db');
@@ -47,22 +48,22 @@ app.event('app_mention', async({ event, context }) => {
 
   //-- "assign [@user]" for this channel
   if (utils.isAssign(event, context)) {
-    cmdAssign(app, store, utils, text, msgText, botToken, channel, channelMsgFormat);
+    cmdAssign(app, store, utils, text, msgText, botToken, channel, channelMsgFormat, errHandler);
   }
 
   //-- "who" is the concierge for this channel?
   else if (utils.matchSimpleCommand('who', event, context)) {
-    cmdWho(app, store, msgText, botToken, channel, channelMsgFormat);
+    cmdWho(app, store, msgText, botToken, channel, channelMsgFormat, errHandler);
   }
 
   //-- "clear" currently assigned concierge for channel
   if (utils.matchSimpleCommand('clear', event, context)) {
-    cmdClear(app, store, utils, msgText, botToken, channel, channelMsgFormat);
+    cmdClear(app, store, utils, msgText, botToken, channel, channelMsgFormat, errHandler);
   }
 
   //-- "help"
   else if (utils.matchSimpleCommand('help', event, context)) {
-    cmdHelp(app, botToken, channel, channelMsgFormat);
+    cmdHelp(app, botToken, channel, channelMsgFormat, errHandler);
   }
 
   //-- "@concierge [message]" sends DM to concierge, notifies channel, and notifies sender via ephemeral
@@ -72,7 +73,7 @@ app.event('app_mention', async({ event, context }) => {
     !utils.matchSimpleCommand('help', event, context) && 
     !utils.matchSimpleCommand('clear', event, context)
   ) {
-    message(app, store, msgText, event.ts, sentByUser, botToken, channel, channelMsgFormat);
+    message(app, store, msgText, event.ts, sentByUser, botToken, channel, channelMsgFormat, errHandler);
   }
 
   // Log useful things

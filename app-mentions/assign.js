@@ -1,4 +1,4 @@
-module.exports = async (app, store, utils, text, msgText, botToken, channel, channelMsgFormat) => {
+module.exports = async (app, store, utils, text, msgText, botToken, channel, channelMsgFormat, errHandler) => {
   try {
     const assigned = utils.getAssignmentMsgTxt(text);
     const save = await store.saveAssignment(channel, assigned);
@@ -10,11 +10,6 @@ module.exports = async (app, store, utils, text, msgText, botToken, channel, cha
     });
   }
   catch (err) {
-    console.error(err);
-    const errorResult = await app.client.chat.postMessage({
-      token: botToken,
-      channel: channel,
-      text: msgText.errorAssignment(err)
-    });
+    errHandler(app, botToken, channel, msgText, err);
   }
 };

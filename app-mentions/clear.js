@@ -1,4 +1,4 @@
-module.exports = async (app, store, utils, msgText, botToken, channel, channelMsgFormat) => {
+module.exports = async (app, store, utils, msgText, botToken, channel, channelMsgFormat, errHandler) => {
   try {
     const list = await store.getStoreList();
     if (utils.inList(channel, list)) {
@@ -19,11 +19,6 @@ module.exports = async (app, store, utils, msgText, botToken, channel, channelMs
     }
   }
   catch (err) {
-    console.error(err);
-    const errorResult = await app.client.chat.postMessage({
-      token: botToken,
-      channel: channel,
-      text: msgText.errorClear(err)
-    });
+    errHandler(app, botToken, channel, msgText, err);
   }
 };
