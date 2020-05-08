@@ -73,7 +73,7 @@ _(In a #channel)_
 5. Download and use [ngrok](https://ngrok.com) to expose a public URL for your local web server.
 6. Once you have ngrok pointing to your Slack app's local development environment and the server is running, go to your **Slack App settings** and in the **Event Subscriptions** section, toggle `On` "Enable Events."
 7. For the "Request URL," enter `https://your-ngrok-url/slack/events`.
-8. In "Subscribe to bot events," add `app_mentions`.
+8. In "Subscribe to bot events," add `app_mention`.
 
 ## Deployment
 
