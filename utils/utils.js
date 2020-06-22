@@ -41,9 +41,9 @@ const utils = {
     return false;
   },
   // Ignore some subtypes of messages
-  ignoreMention(subtype) {
+  ignoreMention(event) {
     const disallowedSubtypes = ['channel_topic', 'message_changed'];
-    return disallowedSubtypes.indexOf(subtype) > -1;
+    return disallowedSubtypes.indexOf(event.subtype) > -1 || !!event.edited;
   }
 };
 
