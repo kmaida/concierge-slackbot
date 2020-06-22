@@ -48,6 +48,11 @@ app.event('app_mention', async({ event, context }) => {
   const channel = event.channel;                     // channel ID
   const channelMsgFormat = `<#${channel}>`;          // channel formatted for in-message display
   const botToken = context.botToken;
+  const msgSubtype = event.subtype;
+
+  // Stop execution if message subtype should be ignored
+  // E.g., channel topic changes, message edited / link unfurls
+  if (utils.ignoreMention(msgSubtype)) return;
 
   //-- "assign [@user]" for this channel
   if (utils.isAssign(event, context)) {
@@ -78,9 +83,6 @@ app.event('app_mention', async({ event, context }) => {
   ) {
     message(app, store, msgText, event.ts, sentByUser, botToken, channel, channelMsgFormat, errHandler);
   }
-
-  // Log useful things
-  console.log('Event: ', event);
 });
 
 /*------------------

@@ -39,6 +39,11 @@ const utils = {
       return list.filter(item => item.channel === channel).length > 0;
     }
     return false;
+  },
+  // Ignore some subtypes of messages
+  ignoreMention(subtype) {
+    const disallowedSubtypes = ['channel_topic', 'message_changed'];
+    return disallowedSubtypes.indexOf(subtype) > -1;
   }
 };
 
