@@ -41,17 +41,13 @@ db.once('open', function () {
 /*------------------
     APP MENTIONS
 ------------------*/
-app.event('app_mention', async({ event, context }) => {
+app.event('app_mention', utils.ignoreMention, async({ event, context }) => {
   // Gather applicable info
   const text = event.text;                           // raw text from the message mentioning @concierge
   const sentByUser = event.user;                     // ID of user who sent the message
   const channel = event.channel;                     // channel ID
   const channelMsgFormat = `<#${channel}>`;          // channel formatted for in-message display
   const botToken = context.botToken;
-
-  // Stop execution if message subtype should be ignored
-  // E.g., channel topic changes, message edited / link unfurls
-  if (utils.ignoreMention(event)) return;
 
   //-- "assign [@user]" for this channel
   if (utils.isAssign(event, context)) {
