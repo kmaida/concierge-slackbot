@@ -19,12 +19,14 @@ module.exports = async (app, store, msgText, ts, sentByUser, botToken, channel, 
         text: msgText.confirmChannelConciergeMsg(channelMsgFormat, sentByUser)
       });
       // Send ephemeral message (only visible to sender) telling them what to do if urgent
-      const sendEphemeralMsg = await app.client.chat.postEphemeral({
-        token: botToken,
-        channel: channel,
-        user: sentByUser,
-        text: msgText.confirmEphemeralConciergeMsg()
-      });
+      if (!!sentByUser) {
+        const sendEphemeralMsg = await app.client.chat.postEphemeral({
+          token: botToken,
+          channel: channel,
+          user: sentByUser,
+          text: msgText.confirmEphemeralConciergeMsg()
+        });
+      }
     } else {
       // No concierge is assigned; give instructions how to assign
       const result = await app.client.chat.postMessage({
