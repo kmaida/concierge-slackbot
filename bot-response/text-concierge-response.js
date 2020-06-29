@@ -19,7 +19,7 @@ const msgText = {
     return 'There is currently nobody assigned as concierge for this channel. Nothing changed.';
   },
   confirmChannelConciergeMsg: (channelMsgFormat, sentByUser) => {
-    if (!!sentByUser) {
+    if (!!sentByUser || sentByUser === 'USLACKBOT') {
       return `The ${channelMsgFormat} concierge has been notified about <@${sentByUser}>'s message. :bellhop_bell:`;
     } else {
       return `The ${channelMsgFormat} concierge has been notified about a message. :bellhop_bell:`;
@@ -32,7 +32,7 @@ const msgText = {
     return 'Nobody is currently assigned as concierge for ' + channelMsgFormat + '. To assign someone, use `@concierge assign [@user]`.';
   },
   dmToConcierge: (sentByUser, channelMsgFormat, link) => {
-    if (!!sentByUser) {
+    if (!!sentByUser || sentByUser === 'USLACKBOT') {
       return `Hi there! <@${sentByUser}> needs your attention in ${channelMsgFormat} (${link}).\n\n`;
     } else {
       return `Hi there! A message needs your attention in ${channelMsgFormat} (${link}).\n\n`;

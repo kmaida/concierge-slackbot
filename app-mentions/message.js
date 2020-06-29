@@ -19,7 +19,7 @@ module.exports = async (app, store, msgText, ts, sentByUser, botToken, channel, 
         text: msgText.confirmChannelConciergeMsg(channelMsgFormat, sentByUser)
       });
       // Send ephemeral message (only visible to sender) telling them what to do if urgent
-      if (!!sentByUser) {
+      if (!!sentByUser || sentByUser === 'USLACKBOT') {
         const sendEphemeralMsg = await app.client.chat.postEphemeral({
           token: botToken,
           channel: channel,
