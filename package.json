@@ -9,7 +9,7 @@
   "dependencies": {
     "@slack/bolt": "^2.0.1",
     "dotenv": "^8.2.0",
-    "mongoose": "^5.9.12"
+    "mongoose": "^5.13.15"
   },
   "engines": {
     "node": "12.x"
